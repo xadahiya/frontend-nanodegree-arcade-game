@@ -56,6 +56,7 @@ Enemy.prototype.update = function(dt) {
     if ( player.x < (this.x+50) && player.x > (this.x-50) && player.y < (this.y+39) && player.y > (this.y-39)){
         player.moveX = 0;
         player.moveY = 0;
+        console.log(player.x, player.y, player.moveX, player.moveY);
         Player.x = 200;
         player.y = 400;
         alert("Oh no, you got squished! Wanna play again?");
@@ -136,7 +137,7 @@ Player.prototype.handleInput = function(key){
     else if (key == "left" && this.x <= 10){
         return;
     }
-    else if(key == "right" && this.x>= 390){
+    else if(key == "right" && this.x >= 390){
         return;
     }
 
