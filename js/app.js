@@ -1,14 +1,22 @@
 // Enemies our player must avoid
+var baseObj = function(sprite, loc){
+    this.x = loc.x;
+    this.y = loc.y;
+    this.sprite = sprite;
+}
+
 var Enemy = function() {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
+    var sprite = 'images/enemy-bug.png';
     var loc = generateEnemyLocation();
-    this.x = loc.x;
-    this.y = loc.y;
-    this.speed = getRandomInt(100, 200);
+    baseObj.call(this, sprite, loc);
+    var random_speed = getRandomInt(150, 250);
+
+    this.speed = random_speed;
+    this.constructor = Enemy;
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
-    this.sprite = 'images/enemy-bug.png';
 };
 
 //Creates location objects with x and y coordinates
@@ -24,7 +32,7 @@ function getRandomInt(min, max) {
 }
 //Generates enemy starting location
 function generateEnemyLocation(){
-    return new Loc(0, getRandomInt(1, 3)*73);
+    return new Loc(-100, getRandomInt(1, 3)*73);
 
 }
 
@@ -37,15 +45,21 @@ Enemy.prototype.update = function(dt) {
         this.x = this.x +(dt*this.speed);
     }
     else{
-        this.x = 0;
-        this.y = getRandomInt(1, 3)*73;
-        this.speed = getRandomInt(100, 200);
+        var loc = generateEnemyLocation();
+        this.x = loc.x;
+        this.y = loc.y;
+        this.speed = getRandomInt(150, 250);
     }
 
     //to handle collisions
-    if (Math.floor(this.x) == player.x && this.y == player.y){
-        Player.x = 202;
-        player.y = 365;
+    //As bug size is about 100px player will be squished within 100px
+    if ( player.x < (this.x+50) && player.x > (this.x-50) && player.y < (this.y+39) && player.y > (this.y-39)){
+        player.moveX = 0;
+        player.moveY = 0;
+        Player.x = 200;
+        player.y = 400;
+        alert("Oh no, you got squished! Wanna play again?");
+        
     }
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
@@ -62,14 +76,40 @@ Enemy.prototype.render = function() {
 // This class requires an update(), render() and
 // a handleInput() method.
 var Player = function(){
-    this.x = 202;
-    this.y = 365;
-    this.sprite = 'images/char-boy.png';
+
+    var sprite = 'images/char-boy.png';
+    baseObj.call(this, sprite, new Loc(200, 400));
+    this.moveX = 0;
+    this.moveY = 0;
+    this.speed = 4;
+    this.constructor = Player;
 };
 //Player update() method
 Player.prototype.update = function(dt){
-    if (this.y == 0){
-        this.y = 365;
+    if (this.y < 30){
+        this.moveX = 0;
+        this.moveY = 0;
+        this.x = 200;
+        this.y = 400;
+        alert("Congratulations, you won!");
+        return;
+    }
+    
+    if(this.moveX > 0 ){
+        this.x += this.speed;
+        this.moveX -= this.speed;
+    }
+    else if(this.moveX < 0){
+        this.x -= this.speed;
+        this.moveX += this.speed;
+    }
+    else if(this.moveY < 0){
+        this.y -= this.speed;
+        this.moveY += this.speed;
+    }
+    else if(this.moveY > 0){
+        this.y += this.speed;
+        this.moveY -= this.speed;
     }
 
 };
@@ -80,37 +120,39 @@ Player.prototype.render = function(){
 };
 
 //Player handleInput() method
-Player.prototype.handleInput = function(keyCode){
-    console.log(this.x);
-    if(keyCode == "up"){
-        if(this.y >= 73){
-            this.y -= 73;
-            // console.log(this.y);
-        }
-        else{
-            this.y = 365;
-        }
+Player.prototype.handleInput = function(key){
+
+    if(this.moveX !== 0 || this.moveY !== 0) {
+        return;
     }
-    else if (keyCode == "down"){
-        if(this.y < 365){
-            this.y += 73;
-        }
-        else{
-            this.y = 365;
-        }
+    console.log(this.x, this.y);
+    //handles bounds 
+    if(key == "up" && this.y <= 54){
+        return;    
     }
-    else if (keyCode == "left"){
-        if(this.x>0){
-            this.x -= 101;
-        }
-        
+    else if (key == "down" && this.y >= 400){
+        return;    
     }
-    else if(keyCode == "right"){
-        if(this.x<404){
-            this.x += 101;
-        }
-    
+    else if (key == "left" && this.x <= 10){
+        return;
     }
+    else if(key == "right" && this.x>= 390){
+        return;
+    }
+
+    if(key == "up"){
+        this.moveY -= 84; 
+    }
+    else if(key == "down"){
+        this.moveY += 84;
+    }
+    else if(key == "left"){
+        this.moveX -= 100;
+    }
+    else if(key == "right"){
+        this.moveX += 100;
+    }
+
 };
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
